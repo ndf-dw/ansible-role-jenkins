@@ -39,6 +39,10 @@
     mode: 0644
   with_items: "{{ jenkins_init_changes }}"
   register: jenkins_init_prefix
+  notify: reload systemd
+
+- name: "Force systemd to be reload before atempting to restart jenkins"
+  meta: flush_handlers
 
 - name: Ensure jenkins_home {{ jenkins_home }} exists.
   file:
@@ -48,6 +52,16 @@
     group: jenkins
     mode: u+rwx
     follow: true
+
+- name: Ensure jenkins_tmpdir {{ jenkins_tmpdir }} exists.
+  file:
+    path: "{{ jenkins_tmpdir }}"
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: u+rwx
+    follow: true
+  when: jenkins_tmpdir | length > 0
 
 - name: Immediately restart Jenkins on init config changes.
   systemd:

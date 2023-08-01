@@ -24,6 +24,10 @@ The system hostname; usually `localhost` works fine. This will be used during se
 
 The Jenkins home directory which, amongst others, is being used for storing artifacts, workspaces and plugins. This variable allows you to override the default `/var/lib/jenkins` location.
 
+    jenkins_tmpdir: /var/lib/jenkins/tmp
+
+The Jenkins tmp directory where Jenkins put tmp files. This variable allows you to override the default `/tmp` location.
+
     jenkins_http_port: 8080
 
 The HTTP port for Jenkins' web interface.
