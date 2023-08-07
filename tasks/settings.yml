@@ -68,7 +68,7 @@
     follow: true
   when: jenkins_tmpdir | length > 0
 
-- name: "Force systemd to be reload before atempting to restart jenkins"
+- name: Force systemd to be reloaded before atempting to restart jenkins
   meta: flush_handlers
 
 - name: Immediately restart Jenkins on init config changes.
