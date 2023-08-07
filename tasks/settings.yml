@@ -39,6 +39,7 @@
     mode: 0644
   with_items: "{{ jenkins_init_changes }}"
   register: jenkins_init_prefix
+  notify: reload systemd
 
 - name: Ensure jenkins_home {{ jenkins_home }} exists.
   file:
@@ -49,14 +50,6 @@
     mode: u+rwx
     follow: true
 
-- name: Immediately restart Jenkins on init config changes.
-  systemd:
-    name: jenkins
-    state: restarted
-    daemon_reload: true
-  when: jenkins_init_prefix.changed
-  tags: ['skip_ansible_lint']
-
 - name: Create custom init scripts directory.
   file:
     path: "{{ jenkins_home }}/init.groovy.d"
@@ -64,6 +57,27 @@
     owner: "{{ jenkins_process_user }}"
     group: "{{ jenkins_process_group }}"
     mode: 0775
+
+- name: Ensure jenkins_tmpdir {{ jenkins_tmpdir }} exists.
+  file:
+    path: "{{ jenkins_tmpdir }}"
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: u+rwx
+    follow: true
+  when: jenkins_tmpdir | length > 0
+
+- name: Force systemd to be reloaded before atempting to restart jenkins
+  meta: flush_handlers
+
+- name: Immediately restart Jenkins on init config changes.
+  systemd:
+    name: jenkins
+    state: restarted
+    daemon_reload: true
+  when: jenkins_init_prefix.changed
+  tags: ['skip_ansible_lint']
 
 - name: Configure proxy config for Jenkins
   template:
