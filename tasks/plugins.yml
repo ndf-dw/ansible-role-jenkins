@@ -22,9 +22,15 @@
     group: jenkins
     mode: 0755
 
+- name: Get Jenkins version
+  ansible.builtin.command: jenkins --version
+  register: _jenkins_cmd_version
+  changed_when: false
+  check_mode: false
+
 - name: Download current plugin updates from Jenkins update site.
   get_url:
-    url: "{{ jenkins_updates_url }}/update-center.actual.json"
+    url: "{{ jenkins_updates_url }}/update-center.json?id=default&version={{ _jenkins_cmd_version.stdout }}"
     dest: "{{ jenkins_home }}/updates/default.json"
     owner: jenkins
     group: jenkins
