@@ -12,4 +12,4 @@
     content: "{{ jenkins_admin_username }}:{{ jenkins_admin_password }}"
     owner: "{{ jenkins_process_user }}"
     group: "{{ jenkins_process_group }}"
-    mode: 0640
+    mode: 0600
