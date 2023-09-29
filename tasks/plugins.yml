@@ -43,7 +43,7 @@
 
 - name: Get plugins current version
   ansible.builtin.command:
-    cmd: "java -jar {{ jenkins_jar_location }} -s http://{{ jenkins_hostname }}:{{ jenkins_http_port }} -auth {{ jenkins_admin_username }}:{{ jenkins_admin_password }} groovy ="
+    cmd: "java -jar {{ jenkins_jar_location }} -s http://{{ jenkins_hostname }}:{{ jenkins_http_port }} -auth @{{ jenkins_auth_file }} groovy ="
     stdin: |
       import groovy.json.*
       def d = [:]

@@ -1,0 +1,15 @@
+- name: Ensure scripts folder exists.
+  file:
+    path: "{{ jenkins_scripts_dir }}"
+    state: directory
+    owner: "{{ jenkins_process_user }}"
+    group: "{{ jenkins_process_group }}"
+    mode: 0750
+
+- name: Ensure auth file
+  copy:
+    dest: "{{ jenkins_auth_file }}"
+    content: "{{ jenkins_admin_username }}:{{ jenkins_admin_password }}"
+    owner: "{{ jenkins_process_user }}"
+    group: "{{ jenkins_process_group }}"
+    mode: 0640
