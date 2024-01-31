@@ -85,7 +85,7 @@
     dest: "{{ jenkins_home }}/proxy.xml"
     owner: "{{ jenkins_process_user }}"
     group: "{{ jenkins_process_group }}"
-    mode: 0664
+    mode: 0644
   register: jenkins_proxy_config
   when:
     - jenkins_proxy_host | length > 0
