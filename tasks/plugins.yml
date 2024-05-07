@@ -32,6 +32,7 @@
   get_url:
     url: "{{ jenkins_updates_url }}/update-center.json?id=default&version={{ _jenkins_cmd_version.stdout }}"
     dest: "{{ jenkins_home }}/updates/default.json"
+    force: true
     owner: jenkins
     group: jenkins
     mode: 0440
