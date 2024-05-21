@@ -32,6 +32,7 @@
   get_url:
     url: "{{ jenkins_updates_url }}/update-center.json?id=default&version={{ _jenkins_cmd_version.stdout }}"
     dest: "{{ jenkins_home }}/updates/default.json"
+    force: true
     owner: jenkins
     group: jenkins
     mode: 0440
@@ -75,7 +76,9 @@
     url: "http://{{ jenkins_hostname }}:{{ jenkins_http_port }}{{ jenkins_url_prefix }}"
     with_dependencies: "{{ jenkins_plugins_install_dependencies }}"
   with_items: "{{ jenkins_plugins }}"
-  when: jenkins_admin_password | default(false)
+  when: 
+    - jenkins_admin_password | default(false)
+    - item != ''
   notify: restart jenkins
   tags: ['skip_ansible_lint']
   register: plugin_result
