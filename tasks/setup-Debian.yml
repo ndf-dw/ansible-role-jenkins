@@ -1,6 +1,6 @@
 ---
 - name: Ensure dependencies are installed.
-  apt:
+  ansible.builtin.apt:
     name:
       - curl
       - apt-transport-https
@@ -15,7 +15,7 @@
     force: true
 
 - name: Add Jenkins apt repository.
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "{{ jenkins_repo_url }}"
     state: present
     update_cache: true
@@ -23,26 +23,66 @@
   tags: ['skip_ansible_lint']
 
 - name: Download specific Jenkins version.
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ jenkins_pkg_url }}/jenkins_{{ jenkins_version }}_all.deb"
     dest: "/tmp/jenkins_{{ jenkins_version }}_all.deb"
-  when: jenkins_version is defined
+  when:
+    - jenkins_version is defined
+    - not jenkins_repo_url | default(false)
 
 - name: Check if we downloaded a specific version of Jenkins.
-  stat:
+  ansible.builtin.stat:
     path: "/tmp/jenkins_{{ jenkins_version }}_all.deb"
   register: specific_version
-  when: jenkins_version is defined
+  when:
+    - jenkins_version is defined
+    - not jenkins_repo_url | default(false)
 
 - name: Install our specific version of Jenkins.
-  apt:
+  ansible.builtin.apt:
     deb: "/tmp/jenkins_{{ jenkins_version }}_all.deb"
     state: present
-  when: jenkins_version is defined and specific_version.stat.exists
+  when:
+    - jenkins_version is defined
+    - not jenkins_repo_url | default(false)
+    - specific_version.stat.exists
   notify: configure default users
 
+- name: Configuring APT preferences to set jenkins version in desired version
+  ansible.builtin.copy:
+    content: |
+      # Ansible managed
+      Package: jenkins
+      Pin: version {{ jenkins_version }}
+      Pin-Priority: 999
+    dest: /etc/apt/preferences.d/jenkins_hold_version.pref
+  when: jenkins_version is defined
+
 - name: Ensure Jenkins is installed.
-  apt:
-    name: jenkins
+  ansible.builtin.apt:
+    name: jenkins{% if jenkins_version is defined %}={{ jenkins_version }}{% endif %}
     state: "{{ jenkins_package_state }}"
   notify: configure default users
+  when: jenkins_repo_url | default(false)
+
+- name: get jenkins version if not set
+  ansible.builtin.package_facts:
+    manager: "auto"
+  when: jenkins_version is not defined
+  check_mode: false
+
+- name: set jenkins installed package version
+  ansible.builtin.set_fact:
+    installed_jenkins_version: "{{ ansible_facts.packages.jenkins[0].version }}"
+  when: jenkins_version is not defined
+  check_mode: false
+
+- name: Configuring APT preferences to set jenkins version on installed version
+  ansible.builtin.copy:
+    content: |
+      # Ansible managed
+      Package: jenkins
+      Pin: version {{ installed_jenkins_version }}
+      Pin-Priority: 999
+    dest: /etc/apt/preferences.d/jenkins_hold_version.pref
+  when: jenkins_version is not defined
