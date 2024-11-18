@@ -43,8 +43,6 @@
     deb: "/tmp/jenkins_{{ jenkins_version }}_all.deb"
     state: present
   when:
-    - jenkins_version is defined
-    - not jenkins_repo_url | default(false)
     - specific_version.stat.exists
   notify: configure default users
 
