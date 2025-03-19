@@ -43,17 +43,14 @@
     deb: "/tmp/jenkins_{{ jenkins_version }}_all.deb"
     state: present
   when:
+    - specific_version.stat is defined
     - specific_version.stat.exists
   notify: configure default users
 
 - name: Configuring APT preferences to set jenkins version in desired version
-  ansible.builtin.copy:
-    content: |
-      # Ansible managed
-      Package: jenkins
-      Pin: version {{ jenkins_version }}
-      Pin-Priority: 999
-    dest: /etc/apt/preferences.d/jenkins_hold_version.pref
+  ansible.builtin.include_tasks: pinning-jenkins-version-Debian.yml
+  vars:
+    pinned_jenkins_version: "{{ jenkins_version }}"
   when: jenkins_version is defined
 
 - name: Ensure Jenkins is installed.
@@ -76,11 +73,7 @@
   check_mode: false
 
 - name: Configuring APT preferences to set jenkins version on installed version
-  ansible.builtin.copy:
-    content: |
-      # Ansible managed
-      Package: jenkins
-      Pin: version {{ installed_jenkins_version }}
-      Pin-Priority: 999
-    dest: /etc/apt/preferences.d/jenkins_hold_version.pref
+  ansible.builtin.include_tasks: pinning-jenkins-version-Debian.yml
+  vars:
+    pinned_jenkins_version: "{{ installed_jenkins_version }}"
   when: jenkins_version is not defined

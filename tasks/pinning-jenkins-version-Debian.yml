@@ -1,0 +1,9 @@
+---
+- name: Configuring APT preferences to set jenkins version on specific version
+  ansible.builtin.copy:
+    content: |
+      # Ansible managed
+      Package: jenkins
+      Pin: version {{ pinned_jenkins_version }}
+      Pin-Priority: 999
+    dest: /etc/apt/preferences.d/jenkins_hold_version.pref
